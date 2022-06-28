@@ -10,6 +10,7 @@ import (
 	"github.com/go-ble/ble/linux"
 	"github.com/kevinburke/nacl/box"
 	"github.com/tarent/go-nuki"
+	"github.com/tarent/go-nuki/communication"
 	"github.com/tarent/go-nuki/communication/command"
 	"github.com/tarent/go-nuki/logger"
 	"os"
@@ -54,12 +55,18 @@ func main() {
 
 	fmt.Printf("Save content: %s\n", toSave)
 
-	states, err := nukiClient.ReadLockState(context.Background())
+	var states interface{ String() string }
+	switch nukiClient.GetDeviceType() {
+	case communication.DeviceTypeSmartLock:
+		states, err = nukiClient.ReadLockerState(context.Background())
+	case communication.DeviceTypeOpener:
+		states, err = nukiClient.ReadOpenerState(context.Background())
+	}
+
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Device-State: %s\n%s\n",
-		hex.EncodeToString(states),
+	fmt.Printf("Device-State: %s\n",
 		states.String(),
 	)
 

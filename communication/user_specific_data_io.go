@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+const (
+	charUuidUdioSmartLock = "a92ee202-5501-11e4-916c-0800200c9a66"
+	charUuidUdioOpener    = "a92ae202-5501-11e4-916c-0800200c9a66"
+)
+
 var DecryptionError = fmt.Errorf("unable to decrypt message")
 var UnexpectedAuthId = fmt.Errorf("unexpected authorization id")
 
@@ -22,8 +27,9 @@ type udioCommunicator struct {
 	privKey             []byte
 	nukiPubKey          []byte
 
-	client   ble.Client
-	udioChar *ble.Characteristic
+	client     ble.Client
+	udioChar   *ble.Characteristic
+	deviceType DeviceType
 }
 
 // NewUserSpecificDataIOCommunicator establish a new communicator to the "user-specific data io" characteristic to the connected nuki device.
@@ -31,6 +37,7 @@ func NewUserSpecificDataIOCommunicator(client ble.Client, authId uint32, userPri
 	com := &udioCommunicator{
 		commandChan: make(chan command.Command),
 		errorChan:   make(chan error),
+		deviceType:  DeviceTypeUnknown,
 		authId:      authId,
 		privKey:     userPrivateKey,
 		nukiPubKey:  nukiPublicKey,
@@ -41,7 +48,16 @@ func NewUserSpecificDataIOCommunicator(client ble.Client, authId uint32, userPri
 		return nil, fmt.Errorf("unable to discover profile: %w", err)
 	}
 
-	udio := profile.FindCharacteristic(ble.NewCharacteristic(ble.MustParse("a92ee202-5501-11e4-916c-0800200c9a66")))
+	udio := profile.FindCharacteristic(ble.NewCharacteristic(ble.MustParse(charUuidUdioSmartLock)))
+	if udio == nil {
+		udio = profile.FindCharacteristic(ble.NewCharacteristic(ble.MustParse(charUuidUdioOpener)))
+		if udio == nil {
+			return nil, fmt.Errorf("unable to find user-specific data input output characteristic")
+		}
+		com.deviceType = DeviceTypeOpener
+	} else {
+		com.deviceType = DeviceTypeSmartLock
+	}
 
 	_, err = client.DiscoverDescriptors(nil, udio)
 	if err != nil {
@@ -57,6 +73,10 @@ func NewUserSpecificDataIOCommunicator(client ble.Client, authId uint32, userPri
 	com.udioChar = udio
 
 	return com, nil
+}
+
+func (u *udioCommunicator) GetDeviceType() DeviceType {
+	return u.deviceType
 }
 
 func (u *udioCommunicator) Send(cmd command.Command) error {
@@ -79,11 +99,11 @@ func (u *udioCommunicator) Send(cmd command.Command) error {
 }
 
 func (u *udioCommunicator) WaitForResponse(ctx context.Context, timeout time.Duration) (command.Command, error) {
-	return waitForResponse(ctx, timeout, u.commandChan, u.errorChan)
+	return waitForResponse(ctx, u.deviceType, timeout, u.commandChan, u.errorChan)
 }
 
 func (u *udioCommunicator) WaitForSpecificResponse(ctx context.Context, expectedType command.Id, timeout time.Duration) (command.Command, error) {
-	return waitForSpecificResponse(ctx, expectedType, timeout, u.commandChan, u.errorChan, "[UDIO][IN]")
+	return waitForSpecificResponse(ctx, u.deviceType, expectedType, timeout, u.commandChan, u.errorChan, "[UDIO][IN]")
 }
 
 func (u *udioCommunicator) receive(payload []byte) {
@@ -116,7 +136,7 @@ func (u *udioCommunicator) receive(payload []byte) {
 	}
 
 	if !decryptedCommand.CheckCRC() {
-		u.errorChan <- command.ERROR_BAD_CRC
+		u.errorChan <- ERROR_BAD_CRC
 		return
 	}
 

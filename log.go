@@ -2,15 +2,13 @@ package nuki
 
 import (
 	"context"
-	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"github.com/tarent/go-nuki/communication/command"
 )
 
 // GetLogEntriesCount will return the count of persisting logs.
 func (c *Client) GetLogEntriesCount(ctx context.Context, pin string) (command.LogEntryCountCommand, error) {
-	pinAsInt, err := c.checkLogPreconditionAndParsePin(pin)
+	pinAsInt, err := c.checkPreconditionAndParsePin(pin)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +50,7 @@ func (c *Client) GetLogEntriesCount(ctx context.Context, pin string) (command.Lo
 // GetLogEntryStream will start consume the persisted logs from the device. While the callback function will be called
 // foreach received log entry. This function is blocking which mean it will return after the log receiving is done.
 func (c *Client) GetLogEntryStream(ctx context.Context, start uint32, count uint16, order command.LogSortOrder, pin string, clb func(command.LogEntryCommand)) error {
-	pinAsInt, err := c.checkLogPreconditionAndParsePin(pin)
+	pinAsInt, err := c.checkPreconditionAndParsePin(pin)
 	if err != nil {
 		return err
 	}
@@ -117,52 +115,12 @@ func (c *Client) DisableLogging(ctx context.Context, pin string) error {
 
 // SetLogging will set the logging on the connected nuki device.
 func (c *Client) SetLogging(ctx context.Context, pin string, enable bool) error {
-	pinAsInt, err := c.checkLogPreconditionAndParsePin(pin)
+	pinAsInt, err := c.checkPreconditionAndParsePin(pin)
 	if err != nil {
 		return err
 	}
 
-	err = c.udioCom.Send(command.NewRequest(command.IdChallenge))
-	if err != nil {
-		return fmt.Errorf("unable to send request for challenge: %w", err)
-	}
-
-	challenge, err := c.udioCom.WaitForSpecificResponse(ctx, command.IdChallenge, c.responseTimeout)
-	if err != nil {
-		return fmt.Errorf("error while waiting for challenge: %w", err)
-	}
-
-	err = c.udioCom.Send(command.NewEnableLogging(enable, pinAsInt, challenge.AsChallengeCommand().Nonce()))
-	if err != nil {
-		return fmt.Errorf("unable to send request for set logging: %w", err)
-	}
-
-	status, err := c.udioCom.WaitForSpecificResponse(ctx, command.IdStatus, c.responseTimeout)
-	if err != nil {
-		return fmt.Errorf("error while waiting for status: %w", err)
-	}
-
-	if !status.AsStatusCommand().IsComplete() {
-		return fmt.Errorf("unexpected status: expect 0x%02x got 0x%02x", command.CompletionStatusComplete, status.AsStatusCommand().Status())
-	}
-
-	return nil
-}
-
-func (c *Client) checkLogPreconditionAndParsePin(pin string) (uint16, error) {
-	if c.client == nil {
-		return 0, ConnectionNotEstablishedError
-	}
-	if c.udioCom == nil {
-		return 0, UnauthenticatedError
-	}
-	if len(pin) != 4 || hex.DecodedLen(len(pin)) != 2 {
-		return 0, InvalidPinError
-	}
-	rawPin, err := hex.DecodeString(pin)
-	if err != nil {
-		return 0, InvalidPinError
-	}
-
-	return binary.BigEndian.Uint16(rawPin), nil
+	return c.PerformAction(ctx, func(nonce []byte) command.Command {
+		return command.NewEnableLogging(enable, pinAsInt, nonce)
+	})
 }

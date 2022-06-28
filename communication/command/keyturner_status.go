@@ -9,21 +9,26 @@ import (
 type NukiState uint8
 type LockState uint8
 type Trigger uint8
+type DoorSensorState uint8
 
 const (
 	NukiStateUninitialized   = NukiState(0x00)
 	NukiStatePairingMode     = NukiState(0x01)
 	NukiStateDoorMode        = NukiState(0x02)
+	NukiStateContinuousMode  = NukiState(0x03)
 	NukiStateMaintenanceMode = NukiState(0x04)
 
 	LockStateUncalibrated            = LockState(0x00)
 	LockStateLocked                  = LockState(0x01)
 	LockStateUnlocking               = LockState(0x02)
 	LockStateUnlocked                = LockState(0x03)
+	LockStateRtoActive               = LockState(0x03)
 	LockStateLocking                 = LockState(0x04)
 	LockStateUnlatched               = LockState(0x05)
+	LockStateOpen                    = LockState(0x05)
 	LockStateUnlockedLockAndGoActive = LockState(0x06)
 	LockStateUnlatching              = LockState(0x07)
+	LockStateOpening                 = LockState(0x07)
 	LockStateCalibration             = LockState(0xFC)
 	LockStateBootRun                 = LockState(0xFD)
 	LockStateMotorBlocked            = LockState(0xFE)
@@ -34,6 +39,13 @@ const (
 	TriggerButton    = Trigger(0x02)
 	TriggerAutomatic = Trigger(0x03)
 	TriggerAutoLock  = Trigger(0x06)
+
+	DoorSensorStateUnavailable      = DoorSensorState(0x00)
+	DoorSensorStateDeactivated      = DoorSensorState(0x01)
+	DoorSensorStateDoorClosed       = DoorSensorState(0x02)
+	DoorSensorStateDoorOpened       = DoorSensorState(0x03)
+	DoorSensorStateDoorStateUnknown = DoorSensorState(0x04)
+	DoorSensorStateCalibrating      = DoorSensorState(0x05)
 )
 
 type KeyturnerStatesCommand Command
@@ -91,16 +103,16 @@ func (k KeyturnerStatesCommand) LastLockAction() LockAction {
 	return LockAction(Command(k).Payload()[15])
 }
 
-func (k KeyturnerStatesCommand) LastLockTrigger() Trigger {
+func (k KeyturnerStatesCommand) LastLockActionTrigger() Trigger {
 	return Trigger(Command(k).Payload()[16])
 }
 
-func (k KeyturnerStatesCommand) LastLockActionCompletionStatus() uint8 {
-	return Command(k).Payload()[17]
+func (k KeyturnerStatesCommand) LastLockActionCompletionStatus() CompletionStatus {
+	return CompletionStatus(Command(k).Payload()[17])
 }
 
-func (k KeyturnerStatesCommand) DoorSensorState() uint8 {
-	return Command(k).Payload()[18]
+func (k KeyturnerStatesCommand) DoorSensorState() DoorSensorState {
+	return DoorSensorState(Command(k).Payload()[18])
 }
 
 func (k KeyturnerStatesCommand) NightModeActive() bool {
@@ -130,7 +142,7 @@ func (k KeyturnerStatesCommand) String() string {
 		k.ConfigUpdateCount(),
 		k.LockAndGoTimer(),
 		k.LastLockAction(),
-		k.LastLockTrigger(),
+		k.LastLockActionTrigger(),
 		k.LastLockActionCompletionStatus(),
 		k.DoorSensorState(),
 		k.NightModeActive(),

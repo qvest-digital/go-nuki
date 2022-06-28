@@ -11,6 +11,14 @@ import (
 // mtu is the maximum transfer unit (how many bytes will be transfer at once)
 const mtu = 20
 
+type DeviceType uint8
+
+const (
+	DeviceTypeUnknown   = DeviceType(0x00)
+	DeviceTypeSmartLock = DeviceType(0x01)
+	DeviceTypeOpener    = DeviceType(0x02)
+)
+
 // TimeoutErr will be occurred if the used timeout exceeded
 var TimeoutErr = fmt.Errorf("timeout exceeded")
 
@@ -26,16 +34,19 @@ type Communicator interface {
 	// the response was erroneous or the response command is not the expected type.
 	WaitForSpecificResponse(ctx context.Context, expectedType command.Id, timeout time.Duration) (command.Command, error)
 
+	// GetDeviceType will return the discovered device type.
+	GetDeviceType() DeviceType
+
 	// Close will close the underlying connection and unsubscribe all subscriptions.
 	// This method should be called if the communicator is not needed anymore.
 	Close() error
 }
 
-func waitForResponse(ctx context.Context, timeout time.Duration, cmdChan chan command.Command, errChan chan error) (command.Command, error) {
+func waitForResponse(ctx context.Context, deviceType DeviceType, timeout time.Duration, cmdChan chan command.Command, errChan chan error) (command.Command, error) {
 	select {
 	case cmd := <-cmdChan:
 		if cmd.Is(command.IdErrorReport) {
-			return nil, cmd.Error()
+			return nil, Error(cmd, deviceType)
 		}
 
 		return cmd, nil
@@ -48,12 +59,12 @@ func waitForResponse(ctx context.Context, timeout time.Duration, cmdChan chan co
 	}
 }
 
-func waitForSpecificResponse(ctx context.Context, expectedType command.Id, timeout time.Duration, cmdChan chan command.Command, errChan chan error, logPrefix string) (command.Command, error) {
+func waitForSpecificResponse(ctx context.Context, deviceType DeviceType, expectedType command.Id, timeout time.Duration, cmdChan chan command.Command, errChan chan error, logPrefix string) (command.Command, error) {
 	for {
 		select {
 		case cmd := <-cmdChan:
 			if expectedType != command.IdErrorReport && cmd.Is(command.IdErrorReport) {
-				return nil, cmd.Error()
+				return nil, Error(cmd, deviceType)
 			}
 
 			if !cmd.Is(expectedType) {

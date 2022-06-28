@@ -4,10 +4,10 @@
 # go-nuki
 
 A go library to control [nuki](https://nuki.io) devices - such as Smart Locks - via bluetooth. 
-This library is orienting on the official [Nuki Smart Lock API V2.2.1](https://developer.nuki.io/page/nuki-smart-lock-api-2/2/) documentation.
+This library is orienting on the official [Nuki Smart Lock API V2.2.1](https://developer.nuki.io/page/nuki-smart-lock-api-2/2/) and [Nuki Opener API v.1.1.1](https://developer.nuki.io/page/nuki-opener-api-1/7/) documentations.
 Since this library is based on the [go-ble](https://github.com/go-ble/ble) bluetooth lib, only **Linux** and **Mac OS** are supported currently.
 
-This lib was successfully tested with a **Nuki Smart Lock 2.0** but it should also work with other Nuki Smart Locks.
+This lib was successfully tested with a **Nuki Smart Lock 2.0** and **Nuki Opener 2.0** but it should also work with other Nuki Smart Locks / Opener.
 
 # Features
 
@@ -17,11 +17,12 @@ Actually the following features are implemented:
 * [x] Receiving lock status
 * [x] Locking
 * [x] Unlocking
+* [x] Open
 * [x] Receive log entries
 * [x] Enable/Disable event logging
 * [ ] advanced device configuration
   * [ ] set security pin
-  * [ ] update time
+  * [x] update time
   * [ ] time control
   * [ ] add keypad codes
 * [ ] trigger calibration
@@ -38,6 +39,7 @@ import (
   "encoding/hex"
   "fmt"
   "github.com/tarent/go-nuki"
+  "github.com/tarent/go-nuki/communication"
   "github.com/tarent/go-nuki/communication/command"
   "github.com/go-ble/ble"
   "github.com/go-ble/ble/linux"
@@ -83,7 +85,12 @@ func main() {
   
   fmt.Printf("Save content:\n%#v", toSave)
   
-  err = nukiClient.PerformLock(context.Background(), 13)
+  switch nukiClient.GetDeviceType() {
+  case communication.DeviceTypeSmartLock:
+    err = nukiClient.PerformUnlock(context.Background(), 13)
+  case communication.DeviceTypeOpener:
+    err = nukiClient.PerformOpen(context.Background(), 13)
+  }
   if err != nil {
       panic(err)
   }
@@ -99,6 +106,7 @@ import (
   "github.com/go-ble/ble"
   "github.com/go-ble/ble/linux"
   "github.com/tarent/go-nuki"
+  "github.com/tarent/go-nuki/communication"
   "github.com/tarent/go-nuki/communication/command"
   "github.com/kevinburke/nacl"
 )
@@ -130,7 +138,12 @@ func main() {
     panic(err)
   }
 
-  err = nukiClient.PerformLock(context.Background(), 13)
+  switch nukiClient.GetDeviceType() {
+  case communication.DeviceTypeSmartLock:
+    err = nukiClient.PerformUnlock(context.Background(), 13)
+  case communication.DeviceTypeOpener:
+    err = nukiClient.PerformOpen(context.Background(), 13)
+  }
   if err != nil {
     panic(err)
   }

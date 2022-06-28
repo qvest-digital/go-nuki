@@ -1,6 +1,9 @@
-package command
+package communication
 
-import "errors"
+import (
+	"errors"
+	"github.com/tarent/go-nuki/communication/command"
+)
 
 var (
 	ERROR_BAD_CRC    = errors.New("CRC of received command is invalid")
@@ -32,19 +35,23 @@ var (
 	K_ERROR_MOTOR_BLOCKED          = errors.New("the motor blocks")
 	K_ERROR_CLUTCH_FAILURE         = errors.New("there is a problem with the clutch during motor movement")
 	K_ERROR_MOTOR_TIMEOUT          = errors.New("the motor moves for a given period of time but did not block")
-	K_ERROR_BUSY                   = errors.New("any lock action via bluetooth if there is already a lock action processing")
-	K_ERROR_CANCELED               = errors.New("any lock action or during calibration if the user canceled the motor movement by pressing the button")
-	K_ERROR_NOT_CALIBRATED         = errors.New("any lock action if the Smart Lock has not yet been calibrated")
+	K_ERROR_BUSY                   = errors.New("there is already a lock action processing")
+	K_ERROR_CANCELED               = errors.New("the user canceled the motor movement by pressing the button")
+	K_ERROR_SL_NOT_CALIBRATED      = errors.New("the Smart Lock has not yet been calibrated")
+	K_ERROR_OPENER_NOT_CALIBRATED  = errors.New("the Opener is not in operating mode 0x00 and has not yet been trained")
 	K_ERROR_MOTOR_POSITION_LIMIT   = errors.New("the internal position database is not able to store any more values")
 	K_ERROR_MOTOR_LOW_VOLTAGE      = errors.New("the motor blocks because of low voltage")
 	K_ERROR_MOTOR_POWER_FAILURE    = errors.New("power drain during motor movement is zero")
 	K_ERROR_CLUTCH_POWER_FAILURE   = errors.New("the power drain during clutch movement is zero")
+	K_ERROR_RECORDING_TIMEOUT      = errors.New("the BUS signal recording duration > 30s without receiving a signal")
 	K_ERROR_VOLTAGE_TOO_LOW        = errors.New("the battery voltage is too low and a calibration will therefore not be started")
+	K_ERROR_LOW_VOLTAGE            = errors.New("operating mode is > 1 and no voltage is detected on BUS connection")
 	K_ERROR_FIRMWARE_UPDATE_NEEDED = errors.New("a firmware update is mandatory")
+	K_ERROR_OPERATING_MODE_UNKNOWN = errors.New("operating mode is not in the valid range of the firmware")
 )
 
-func (c Command) Error() error {
-	if c.Id() != IdErrorReport {
+func Error(c command.Command, deviceType DeviceType) error {
+	if c.Id() != command.IdErrorReport {
 		return nil
 	}
 	if len(c) < 3 {
@@ -111,19 +118,30 @@ func (c Command) Error() error {
 	case 0x46:
 		return K_ERROR_CANCELED
 	case 0x47:
-		return K_ERROR_NOT_CALIBRATED
+		if deviceType == DeviceTypeSmartLock {
+			return K_ERROR_SL_NOT_CALIBRATED
+		}
+		return K_ERROR_OPENER_NOT_CALIBRATED
 	case 0x48:
 		return K_ERROR_MOTOR_POSITION_LIMIT
 	case 0x49:
-		return K_ERROR_MOTOR_LOW_VOLTAGE
+		if deviceType == DeviceTypeSmartLock {
+			return K_ERROR_MOTOR_LOW_VOLTAGE
+		}
+		return K_ERROR_LOW_VOLTAGE
 	case 0x4A:
 		return K_ERROR_MOTOR_POWER_FAILURE
 	case 0x4B:
-		return K_ERROR_CLUTCH_POWER_FAILURE
+		if deviceType == DeviceTypeSmartLock {
+			return K_ERROR_CLUTCH_POWER_FAILURE
+		}
+		return K_ERROR_RECORDING_TIMEOUT
 	case 0x4C:
 		return K_ERROR_VOLTAGE_TOO_LOW
 	case 0x4D:
 		return K_ERROR_FIRMWARE_UPDATE_NEEDED
+	case 0x50:
+		return K_ERROR_OPERATING_MODE_UNKNOWN
 	}
 
 	return ERROR_UNKNOWN
