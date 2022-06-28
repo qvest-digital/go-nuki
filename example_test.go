@@ -9,6 +9,7 @@ import (
 	"github.com/kevinburke/nacl"
 	"github.com/kevinburke/nacl/box"
 	"github.com/tarent/go-nuki/communication/command"
+	"time"
 )
 
 func ExampleClient_EstablishConnection() {
@@ -90,7 +91,7 @@ func ExampleClient_Authenticate() {
 	}
 }
 
-func ExampleClient_ReadLockState() {
+func ExampleClient_ReadStates() {
 	device, err := linux.NewDevice()
 	if err != nil {
 		panic(err)
@@ -115,12 +116,53 @@ func ExampleClient_ReadLockState() {
 		panic(err)
 	}
 
-	state, err := nukiClient.ReadLockState(context.Background())
+	state, err := nukiClient.ReadStates(context.Background())
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("Status:\n%s", state)
+}
+
+func ExampleClient_PerformAction() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiClient := NewClient(device)
+	defer nukiClient.Close()
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	authId := command.AuthorizationId(111111) //load from file
+	privateKey := nacl.Key(make([]byte, 32))  //load from file
+	publicKey := nacl.Key(make([]byte, 32))   //load from file
+	nukiPublicKey := []byte{}                 //load from file
+
+	err = nukiClient.Authenticate(privateKey, publicKey, nukiPublicKey, authId)
+	if err != nil {
+		panic(err)
+	}
+
+	err = nukiClient.PerformAction(context.Background(), func(nonce []byte) command.Command {
+		suffix := "logSuffix"
+
+		return command.NewLockAction(
+			command.LockActionLockAndGo,
+			13,
+			command.LockActionFlagForce|command.LockActionFlagAutoUnlock,
+			&suffix,
+			nonce,
+		)
+	})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func ExampleClient_PerformLock() {
@@ -186,7 +228,7 @@ func ExampleClient_PerformUnlock() {
 	}
 }
 
-func ExampleClient_GetLogEntriesCount() {
+func ExampleClient_PerformLockAction() {
 	device, err := linux.NewDevice()
 	if err != nil {
 		panic(err)
@@ -212,7 +254,39 @@ func ExampleClient_GetLogEntriesCount() {
 		panic(err)
 	}
 
-	logCount, err := nukiClient.GetLogEntriesCount(context.Background(), "0000")
+	err = nukiClient.PerformLockAction(context.Background(), 13, command.LockActionLockAndGo)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ExampleClient_ReadLogEntriesCount() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiClient := NewClient(device)
+	defer nukiClient.Close()
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	//generate key-pair
+	publicKey, privateKey, err := box.GenerateKey(rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+
+	err = nukiClient.Pair(context.Background(), privateKey, publicKey, 13, command.ClientIdTypeApp, "Lib-Nuki-Example")
+	if err != nil {
+		panic(err)
+	}
+
+	logCount, err := nukiClient.ReadLogEntriesCount(context.Background(), "0000")
 	if err != nil {
 		panic(err)
 	}
@@ -220,7 +294,7 @@ func ExampleClient_GetLogEntriesCount() {
 	fmt.Printf("Count: %s\n", logCount.String())
 }
 
-func ExampleClient_GetLogEntries() {
+func ExampleClient_ReadLogEntries() {
 	device, err := linux.NewDevice()
 	if err != nil {
 		panic(err)
@@ -246,7 +320,7 @@ func ExampleClient_GetLogEntries() {
 		panic(err)
 	}
 
-	logs, err := nukiClient.GetLogEntries(context.Background(), 0, 10, command.LogSortOrderDescending, "0000")
+	logs, err := nukiClient.ReadLogEntries(context.Background(), 0, 10, command.LogSortOrderDescending, "0000")
 	if err != nil {
 		panic(err)
 	}
@@ -256,7 +330,7 @@ func ExampleClient_GetLogEntries() {
 	}
 }
 
-func ExampleClient_GetLogEntryStream() {
+func ExampleClient_ReadLogEntryStream() {
 	device, err := linux.NewDevice()
 	if err != nil {
 		panic(err)
@@ -282,7 +356,7 @@ func ExampleClient_GetLogEntryStream() {
 		panic(err)
 	}
 
-	err = nukiClient.GetLogEntryStream(context.Background(), 0, 0xffff, command.LogSortOrderDescending, "0000", func(log command.LogEntryCommand) {
+	err = nukiClient.ReadLogEntryStream(context.Background(), 0, 0xffff, command.LogSortOrderDescending, "0000", func(log command.LogEntryCommand) {
 		fmt.Printf("%s\n", log.String())
 	})
 	if err != nil {
@@ -320,4 +394,171 @@ func ExampleClient_SetLogging() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func ExampleClient_PerformOpen() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiClient := NewClient(device)
+	defer nukiClient.Close()
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	authId := command.AuthorizationId(111111) //load from file
+	privateKey := nacl.Key(make([]byte, 32))  //load from file
+	publicKey := nacl.Key(make([]byte, 32))   //load from file
+	nukiPublicKey := []byte{}                 //load from file
+
+	err = nukiClient.Authenticate(privateKey, publicKey, nukiPublicKey, authId)
+	if err != nil {
+		panic(err)
+	}
+
+	err = nukiClient.PerformOpen(context.Background(), 13)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ExampleClient_PerformOpenAction() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiClient := NewClient(device)
+	defer nukiClient.Close()
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	authId := command.AuthorizationId(111111) //load from file
+	privateKey := nacl.Key(make([]byte, 32))  //load from file
+	publicKey := nacl.Key(make([]byte, 32))   //load from file
+	nukiPublicKey := []byte{}                 //load from file
+
+	err = nukiClient.Authenticate(privateKey, publicKey, nukiPublicKey, authId)
+	if err != nil {
+		panic(err)
+	}
+
+	err = nukiClient.PerformOpenAction(context.Background(), 13, command.OpenActionActivateRTO)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ExampleClient_UpdateTime() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiClient := NewClient(device)
+	defer nukiClient.Close()
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	authId := command.AuthorizationId(111111) //load from file
+	privateKey := nacl.Key(make([]byte, 32))  //load from file
+	publicKey := nacl.Key(make([]byte, 32))   //load from file
+	nukiPublicKey := []byte{}                 //load from file
+
+	err = nukiClient.Authenticate(privateKey, publicKey, nukiPublicKey, authId)
+	if err != nil {
+		panic(err)
+	}
+
+	err = nukiClient.UpdateTime(context.Background(), "0000", time.Now())
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ExampleClient_ReadConfig() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiClient := NewClient(device)
+	defer nukiClient.Close()
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	authId := command.AuthorizationId(111111) //load from file
+	privateKey := nacl.Key(make([]byte, 32))  //load from file
+	publicKey := nacl.Key(make([]byte, 32))   //load from file
+	nukiPublicKey := []byte{}                 //load from file
+
+	err = nukiClient.Authenticate(privateKey, publicKey, nukiPublicKey, authId)
+	if err != nil {
+		panic(err)
+	}
+
+	config, err := nukiClient.ReadConfig(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Config:\n%s", config)
+}
+
+func ExampleClient_Reboot() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiClient := NewClient(device)
+	defer nukiClient.Close()
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	authId := command.AuthorizationId(111111) //load from file
+	privateKey := nacl.Key(make([]byte, 32))  //load from file
+	publicKey := nacl.Key(make([]byte, 32))   //load from file
+	nukiPublicKey := []byte{}                 //load from file
+
+	err = nukiClient.Authenticate(privateKey, publicKey, nukiPublicKey, authId)
+	if err != nil {
+		panic(err)
+	}
+
+	err = nukiClient.Reboot(context.Background(), "0000")
+	if err != nil {
+		panic(err)
+	}
+
+	//give the device a little time to reboot
+	time.Sleep(10 * time.Second)
+
+	//re-establish the connection to the device
+	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	//do something with the device...
 }

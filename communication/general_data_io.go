@@ -15,8 +15,9 @@ type gdioCommunicator struct {
 
 	curCommand command.Command
 
-	client   ble.Client
-	gdioChar *ble.Characteristic
+	client     ble.Client
+	gdioChar   *ble.Characteristic
+	deviceType DeviceType
 }
 
 // NewGeneralDataIOCommunicator establish a new communicator to the "general data io" characteristic to the connected nuki device.
@@ -24,28 +25,21 @@ func NewGeneralDataIOCommunicator(client ble.Client) (Communicator, error) {
 	com := &gdioCommunicator{
 		commandChan: make(chan command.Command),
 		errorChan:   make(chan error),
+		deviceType:  DeviceTypeUnknown,
 	}
 
-	profile, err := client.DiscoverProfile(false)
+	var err error
+	com.gdioChar, com.deviceType, err = setupGeneralDataInputOutputCharacteristic(client, com.receive)
 	if err != nil {
-		return nil, fmt.Errorf("unable to discover profile: %w", err)
+		return nil, err
 	}
-	gdio := profile.FindCharacteristic(ble.NewCharacteristic(ble.MustParse("a92ee101-5501-11e4-916c-0800200c9a66")))
-
-	_, err = client.DiscoverDescriptors(nil, gdio)
-	if err != nil {
-		return nil, fmt.Errorf("unable to discover general data input output characteristic descriptors: %w", err)
-	}
-
-	err = client.Subscribe(gdio, true, com.receive)
-	if err != nil {
-		return nil, fmt.Errorf("unable to subscribe GDIO: %w", err)
-	}
-
 	com.client = client
-	com.gdioChar = gdio
 
 	return com, nil
+}
+
+func (g *gdioCommunicator) GetDeviceType() DeviceType {
+	return g.deviceType
 }
 
 func (g *gdioCommunicator) Send(cmd command.Command) error {
@@ -61,11 +55,11 @@ func (g *gdioCommunicator) Send(cmd command.Command) error {
 }
 
 func (g *gdioCommunicator) WaitForResponse(ctx context.Context, timeout time.Duration) (command.Command, error) {
-	return waitForResponse(ctx, timeout, g.commandChan, g.errorChan)
+	return waitForResponse(ctx, g.deviceType, timeout, g.commandChan, g.errorChan)
 }
 
 func (g *gdioCommunicator) WaitForSpecificResponse(ctx context.Context, expectedType command.Id, timeout time.Duration) (command.Command, error) {
-	return waitForSpecificResponse(ctx, expectedType, timeout, g.commandChan, g.errorChan, "[GDIO][IN]")
+	return waitForSpecificResponse(ctx, g.deviceType, expectedType, timeout, g.commandChan, g.errorChan, "[GDIO][IN]")
 }
 
 func (g *gdioCommunicator) receive(payload []byte) {
@@ -86,7 +80,7 @@ func (g *gdioCommunicator) receive(payload []byte) {
 	}
 
 	if !g.curCommand.CheckCRC() {
-		g.errorChan <- command.ERROR_BAD_CRC
+		g.errorChan <- ERROR_BAD_CRC
 		return
 	}
 

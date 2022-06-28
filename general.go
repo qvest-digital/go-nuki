@@ -60,7 +60,20 @@ func (c *Client) EstablishConnection(ctx context.Context, deviceAddress ble.Addr
 		return fmt.Errorf("error while establish communication: %w", err)
 	}
 
+	//in case of "re-establish" a connection (for example after reboot the device)
+	if c.nukiPublicKey != nil {
+		return c.Authenticate(c.privateKey, c.publicKey, c.nukiPublicKey, c.authId)
+	}
+
 	return nil
+}
+
+// GetDeviceType will return the discovered type of the connected device.
+func (c *Client) GetDeviceType() communication.DeviceType {
+	if c.gdioCom == nil {
+		return communication.DeviceTypeUnknown
+	}
+	return c.gdioCom.GetDeviceType()
 }
 
 // GeneralDataIOCommunicator will return the communicator which is responsible for general data io.
@@ -84,18 +97,21 @@ func (c *Client) Close() error {
 		if err := c.gdioCom.Close(); err != nil {
 			errors = append(errors, err)
 		}
+		c.gdioCom = nil
 	}
 
 	if c.udioCom != nil {
 		if err := c.udioCom.Close(); err != nil {
 			errors = append(errors, err)
 		}
+		c.udioCom = nil
 	}
 
 	if c.client != nil {
 		if err := c.client.Conn().Close(); err != nil {
 			errors = append(errors, err)
 		}
+		c.client = nil
 	}
 
 	if len(errors) > 0 {
@@ -103,4 +119,61 @@ func (c *Client) Close() error {
 	}
 
 	return nil
+}
+
+// PerformAction will request the connected and paired nuki opener to perform the given command.
+func (c *Client) PerformAction(ctx context.Context, actionBuilder func(nonce []byte) command.Command) error {
+	if c.client == nil {
+		return ConnectionNotEstablishedError
+	}
+	if c.udioCom == nil {
+		return UnauthenticatedError
+	}
+
+	err := c.udioCom.Send(command.NewRequest(command.IdChallenge))
+	if err != nil {
+		return fmt.Errorf("unable to send request for challenge: %w", err)
+	}
+
+	challenge, err := c.udioCom.WaitForSpecificResponse(ctx, command.IdChallenge, c.responseTimeout)
+	if err != nil {
+		return fmt.Errorf("error while waiting for challenge: %w", err)
+	}
+
+	toSend := actionBuilder(challenge.AsChallengeCommand().Nonce())
+	err = c.udioCom.Send(toSend)
+	if err != nil {
+		return fmt.Errorf("unable to send action: %w", err)
+	}
+
+	status, err := c.udioCom.WaitForSpecificResponse(ctx, command.IdStatus, c.responseTimeout)
+	if err != nil {
+		return fmt.Errorf("error while waiting for status: %w", err)
+	}
+
+	if status.AsStatusCommand().IsAccepted() {
+		// This will be returned to signal that a command has been accepted but the completion status will be signaled later.
+		// So here we just wait for the second status.
+
+		status, err = c.udioCom.WaitForSpecificResponse(ctx, command.IdStatus, c.responseTimeout)
+		if err != nil {
+			return fmt.Errorf("error while waiting for status: %w", err)
+		}
+
+		if !status.AsStatusCommand().IsComplete() {
+			return fmt.Errorf("unexpected status: expect 0x%02x got 0x%02x", command.CompletionStatusComplete, status.AsStatusCommand().Status())
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) checkPreconditionAndParsePin(pin string) (command.Pin, error) {
+	if c.client == nil {
+		return 0, ConnectionNotEstablishedError
+	}
+	if c.udioCom == nil {
+		return 0, UnauthenticatedError
+	}
+	return command.NewPin(pin)
 }

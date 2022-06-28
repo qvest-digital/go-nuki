@@ -148,7 +148,7 @@ func (l LogEntryLockAction) CompletionStatus() uint8 {
 }
 
 func (l LogEntryLockAction) String() string {
-	return fmt.Sprintf("LockAction: %02x; Trigger: %02x; Flags: %02x; Completion status: %02x",
+	return fmt.Sprintf("LockAction: 0x%02x; Trigger: 0x%02x; Flags: 0x%02x; Completion status: 0x%02x",
 		l.LockAction(),
 		l.Trigger(),
 		l.Flags(),
@@ -181,7 +181,7 @@ func (l LogEntryKeypadAction) CodeId() uint16 {
 }
 
 func (l LogEntryKeypadAction) String() string {
-	return fmt.Sprintf("LockAction: %02x; Source: %02x; Completion status: %02x; CodeId: %d",
+	return fmt.Sprintf("LockAction: 0x%02x; Source: 0x%02x; Completion status: 0x%02x; CodeId: %d",
 		l.LockAction(),
 		l.Source(),
 		l.CompletionStatus(),
