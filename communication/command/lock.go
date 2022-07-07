@@ -17,6 +17,9 @@ const (
 	LockActionFobAction1           = LockAction(0x81)
 	LockActionFobAction2           = LockAction(0x82)
 	LockActionFobAction3           = LockAction(0x83)
+
+	LockActionFlagAutoUnlock = 0b0000_0001
+	LockActionFlagForce      = 0b0000_0010
 )
 
 func NewLockAction(action LockAction, appId uint32, flags uint8, nameSuffix *string, nonce []byte) Command {

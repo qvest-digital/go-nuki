@@ -54,16 +54,15 @@ func main() {
 
 	fmt.Printf("Save content: %s\n", toSave)
 
-	states, err := nukiClient.ReadLockState(context.Background())
+	states, err := nukiClient.ReadStates(context.Background())
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Device-State: %s\n%s\n",
-		hex.EncodeToString(states),
+	fmt.Printf("Device-State: %s\n",
 		states.String(),
 	)
 
-	err = nukiClient.GetLogEntryStream(context.Background(), 0, 0xffff, command.LogSortOrderDescending, "0000", func(log command.LogEntryCommand) {
+	err = nukiClient.ReadLogEntryStream(context.Background(), 0, 0xffff, command.LogSortOrderDescending, "0000", func(log command.LogEntryCommand) {
 		fmt.Printf("%s\n", log.String())
 	})
 	if err != nil {
