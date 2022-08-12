@@ -26,6 +26,13 @@ const (
 	TriggerManual    = Trigger(0x01)
 	TriggerButton    = Trigger(0x02)
 	TriggerAutomatic = Trigger(0x03)
+
+	DoorSensorStateUnavailable      = DoorSensorState(0x00)
+	DoorSensorStateDeactivated      = DoorSensorState(0x01)
+	DoorSensorStateDoorClosed       = DoorSensorState(0x02)
+	DoorSensorStateDoorOpened       = DoorSensorState(0x03)
+	DoorSensorStateDoorStateUnknown = DoorSensorState(0x04)
+	DoorSensorStateCalibrating      = DoorSensorState(0x05)
 )
 
 type StatesType uint8
