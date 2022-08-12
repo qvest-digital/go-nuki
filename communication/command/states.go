@@ -48,7 +48,6 @@ type StatesSmartLockCommand Command
 const (
 	LockStateSmartLockUnlocking = LockState(0x02)
 	LockStateSmartLockUnlocked  = LockState(0x03)
-	LockStateSmartLockRtoActive = LockState(0x03)
 	LockStateSmartLockLocking   = LockState(0x04)
 	LockStateSmartLockUnlatched = LockState(0x05)
 
