@@ -6,7 +6,7 @@ import (
 )
 
 type Logger interface {
-	Printf(format string, v ...any)
+	Printf(format string, v ...interface{})
 }
 
 // Debug is the Logger which is used for debug output
