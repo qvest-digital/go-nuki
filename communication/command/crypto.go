@@ -73,6 +73,15 @@ func DecryptCommand(encryptedCmd Command, privateKey []byte, nukiPubKey []byte) 
 	return binary.LittleEndian.Uint32(decrypted[:4]), decrypted[4:]
 }
 
+func IsCommandComplete(encryptedCmd Command) bool {
+	length := len(encryptedCmd)
+	if length < 30 {
+		return false
+	}
+	expectedLength := 30 + binary.LittleEndian.Uint16(encryptedCmd[28:30])
+	return length == int(expectedLength)
+}
+
 // only for monkey patching purposes
 var newNonce192 = func() []byte {
 	nonce := new([24]byte)

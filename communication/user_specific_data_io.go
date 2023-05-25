@@ -86,7 +86,7 @@ func (u *udioCommunicator) receive(payload []byte) {
 
 	u.curEncryptedCommand = append(u.curEncryptedCommand, payload...)
 
-	if len(payload) == mtu {
+	if !command.IsCommandComplete(u.curEncryptedCommand) {
 		//we expect more data
 		return
 	}
