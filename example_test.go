@@ -562,3 +562,43 @@ func ExampleClient_Reboot() {
 
 	//do something with the device...
 }
+
+func ExampleMonitorStateChanges() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
+	defer nukiClient.Close()
+
+	// make sure pairing was done with ClientIdTypeBridge
+	authId := command.AuthorizationId(111111) //load from file
+	privateKey := nacl.Key(make([]byte, 32))  //load from file
+	publicKey := nacl.Key(make([]byte, 32))   //load from file
+	nukiPublicKey := []byte{}                 //load from file
+
+	err = nukiClient.Authenticate(privateKey, publicKey, nukiPublicKey, authId)
+	if err != nil {
+		panic(err)
+	}
+
+	MonitorStateChanges(context.Background(), handleStateChange, nukiClient)
+}
+
+func handleStateChange(ctx context.Context, c *Client) {
+	fmt.Println("State change detected, loading new state...")
+
+	defer c.Close()
+	err := c.EstablishConnection(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	states, err := c.ReadStates(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Device-State: %s\n", states.String())
+}

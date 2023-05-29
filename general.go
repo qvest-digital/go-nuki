@@ -31,6 +31,8 @@ type Client struct {
 
 	gdioCom communication.Communicator
 	udioCom communication.Communicator
+
+	stateChanged bool
 }
 
 func NewClient(bleDevice ble.Device, deviceAddress ble.Addr) *Client {
@@ -39,6 +41,7 @@ func NewClient(bleDevice ble.Device, deviceAddress ble.Addr) *Client {
 	return &Client{
 		addr: deviceAddress,
 		responseTimeout: 10 * time.Second,
+		stateChanged: true,
 	}
 }
 
