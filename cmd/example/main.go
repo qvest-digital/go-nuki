@@ -24,11 +24,11 @@ func main() {
 	// disable debug logging
 	logger.Debug = nil
 
-	nukiClient := nuki.NewClient(device)
+	nukiDeviceAddr := ble.NewAddr(os.Args[1])
+	nukiClient := nuki.NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr(os.Args[1])
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
