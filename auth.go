@@ -108,6 +108,10 @@ func (c *Client) Authenticate(privateKey, publicKey nacl.Key, nukiPublicKey []by
 	c.nukiPublicKey = nukiPublicKey
 	c.authId = authId
 
+	if c.client == nil {
+		return nil
+	}
+
 	var err error
 	c.udioCom, err = communication.NewUserSpecificDataIOCommunicator(
 		c.client,

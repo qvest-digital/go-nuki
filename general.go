@@ -20,6 +20,7 @@ var UnauthenticatedError = fmt.Errorf("the client is not authenticated")
 var InvalidPinError = fmt.Errorf("the given pin is invalid")
 
 type Client struct {
+	addr            ble.Addr
 	client          ble.Client
 	responseTimeout time.Duration
 
@@ -30,13 +31,17 @@ type Client struct {
 
 	gdioCom communication.Communicator
 	udioCom communication.Communicator
+
+	stateChanged bool
 }
 
-func NewClient(bleDevice ble.Device) *Client {
+func NewClient(bleDevice ble.Device, deviceAddress ble.Addr) *Client {
 	ble.SetDefaultDevice(bleDevice)
 
 	return &Client{
+		addr: deviceAddress,
 		responseTimeout: 10 * time.Second,
+		stateChanged: true,
 	}
 }
 
@@ -48,8 +53,8 @@ func (c *Client) WithTimeout(duration time.Duration) *Client {
 
 // EstablishConnection establish a connection to the given nuki device.
 // Returns an error if there was a problem with connecting to the device.
-func (c *Client) EstablishConnection(ctx context.Context, deviceAddress ble.Addr) error {
-	bleClient, err := ble.Dial(ctx, deviceAddress)
+func (c *Client) EstablishConnection(ctx context.Context) error {
+	bleClient, err := ble.Dial(ctx, c.addr)
 	if err != nil {
 		return fmt.Errorf("error while establish connection: %w", err)
 	}

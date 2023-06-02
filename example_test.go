@@ -18,11 +18,11 @@ func ExampleClient_EstablishConnection() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -34,11 +34,11 @@ func ExampleClient_Pair() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -71,11 +71,11 @@ func ExampleClient_Authenticate() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -97,11 +97,11 @@ func ExampleClient_ReadStates() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -130,11 +130,11 @@ func ExampleClient_PerformAction() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -171,11 +171,11 @@ func ExampleClient_PerformLock() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -202,11 +202,11 @@ func ExampleClient_PerformUnlock() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -234,11 +234,11 @@ func ExampleClient_PerformLockAction() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -266,11 +266,11 @@ func ExampleClient_ReadLogEntriesCount() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -300,11 +300,11 @@ func ExampleClient_ReadLogEntries() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -336,11 +336,11 @@ func ExampleClient_ReadLogEntryStream() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -370,11 +370,11 @@ func ExampleClient_SetLogging() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -402,11 +402,11 @@ func ExampleClient_PerformOpen() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -433,11 +433,11 @@ func ExampleClient_PerformOpenAction() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -464,11 +464,11 @@ func ExampleClient_UpdateTime() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -495,11 +495,11 @@ func ExampleClient_ReadConfig() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -527,11 +527,11 @@ func ExampleClient_Reboot() {
 		panic(err)
 	}
 
-	nukiClient := NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -555,10 +555,50 @@ func ExampleClient_Reboot() {
 	time.Sleep(10 * time.Second)
 
 	//re-establish the connection to the device
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
 
 	//do something with the device...
+}
+
+func ExampleMonitorStateChanges() {
+	device, err := linux.NewDevice()
+	if err != nil {
+		panic(err)
+	}
+
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := NewClient(device, nukiDeviceAddr)
+	defer nukiClient.Close()
+
+	// make sure pairing was done with ClientIdTypeBridge
+	authId := command.AuthorizationId(111111) //load from file
+	privateKey := nacl.Key(make([]byte, 32))  //load from file
+	publicKey := nacl.Key(make([]byte, 32))   //load from file
+	nukiPublicKey := []byte{}                 //load from file
+
+	err = nukiClient.Authenticate(privateKey, publicKey, nukiPublicKey, authId)
+	if err != nil {
+		panic(err)
+	}
+
+	MonitorStateChanges(context.Background(), handleStateChange, nukiClient)
+}
+
+func handleStateChange(ctx context.Context, c *Client) {
+	fmt.Println("State change detected, loading new state...")
+
+	defer c.Close()
+	err := c.EstablishConnection(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	states, err := c.ReadStates(ctx)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Device-State: %s\n", states.String())
 }

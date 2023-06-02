@@ -25,5 +25,7 @@ func (c *Client) ReadStates(ctx context.Context) (command.StatesCommand, error) 
 		return nil, fmt.Errorf("error while waiting for device states: %w", err)
 	}
 
+	c.stateChanged = false
+
 	return statesCommand.AsStatesCommand(), nil
 }

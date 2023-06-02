@@ -57,12 +57,12 @@ func main() {
 		panic(err)
 	}
 
-	nukiClient := nuki.NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := nuki.NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
 	// the device's MAC address can be found by 'hcitool lescan' for example
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -122,12 +122,12 @@ func main() {
 		panic(err)
 	}
 
-	nukiClient := nuki.NewClient(device)
+	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
+	nukiClient := nuki.NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
 	// the device's MAC address can be found by 'hcitool lescan' for example
-	nukiDeviceAddr := ble.NewAddr("54:D2:AA:BB:CC:DD")
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -204,11 +204,11 @@ func main() {
 		panic(err)
 	}
 
-	nukiClient := nuki.NewClient(device)
+	nukiDeviceAddr := ble.NewAddr(os.Args[1])
+	nukiClient := nuki.NewClient(device, nukiDeviceAddr)
 	defer nukiClient.Close()
 
-	nukiDeviceAddr := ble.NewAddr(os.Args[1])
-	err = nukiClient.EstablishConnection(context.Background(), nukiDeviceAddr)
+	err = nukiClient.EstablishConnection(context.Background())
 	if err != nil {
 		panic(err)
 	}
