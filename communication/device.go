@@ -2,7 +2,7 @@ package communication
 
 import (
 	"fmt"
-	"github.com/go-ble/ble"
+	"github.com/memoos/ble"
 )
 
 type DeviceType uint8

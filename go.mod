@@ -3,7 +3,7 @@ module github.com/tarent/go-nuki
 go 1.18
 
 require (
-	github.com/go-ble/ble v0.0.0-20220207185428-60d1eecf2633
+	github.com/memoos/ble v0.0.0-20231212130325-9e4711e9994b
 	github.com/howeyc/crc16 v0.0.0-20171223171357-2b2a61e366a6
 	github.com/kevinburke/nacl v0.0.0-20210405173606-cd9060f5f776
 	github.com/stretchr/testify v1.7.4

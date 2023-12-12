@@ -3,7 +3,7 @@ package nuki
 import (
 	"context"
 	"fmt"
-	"github.com/go-ble/ble"
+	"github.com/memoos/ble"
 	"github.com/kevinburke/nacl"
 	"github.com/tarent/go-nuki/communication"
 	"github.com/tarent/go-nuki/communication/command"
