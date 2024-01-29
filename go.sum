@@ -4,8 +4,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:ma
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-ble/ble v0.0.0-20220207185428-60d1eecf2633 h1:ZrzoZQz1CF33SPHLkjRpnVuZwr9cO1lTEc4Js7SgBos=
-github.com/go-ble/ble v0.0.0-20220207185428-60d1eecf2633/go.mod h1:fFJl/jD/uyILGBeD5iQ8tYHrPlJafyqCJzAyTHNJ1Uk=
+github.com/go-ble/ble v0.0.0-20240122180141-8c5522f54333 h1:bQK6D51cNzMSTyAf0HtM30V2IbljHTDam7jru9JNlJA=
+github.com/go-ble/ble v0.0.0-20240122180141-8c5522f54333/go.mod h1:fFJl/jD/uyILGBeD5iQ8tYHrPlJafyqCJzAyTHNJ1Uk=
 github.com/howeyc/crc16 v0.0.0-20171223171357-2b2a61e366a6 h1:IIVxLyDUYErC950b8kecjoqDet8P5S4lcVRUOM6rdkU=
 github.com/howeyc/crc16 v0.0.0-20171223171357-2b2a61e366a6/go.mod h1:JslaLRrzGsOKJgFEPBP65Whn+rdwDQSk0I0MCRFe2Zw=
 github.com/kevinburke/nacl v0.0.0-20210405173606-cd9060f5f776 h1:W8T7zJRO9imecUZySwPkuXHosjp2MloqAY1eSAEEOIo=
