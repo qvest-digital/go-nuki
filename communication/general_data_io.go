@@ -3,7 +3,7 @@ package communication
 import (
 	"context"
 	"fmt"
-	"github.com/memoos/ble"
+	"github.com/go-ble/ble"
 	"github.com/tarent/go-nuki/communication/command"
 	"github.com/tarent/go-nuki/logger"
 	"time"
